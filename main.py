@@ -14,6 +14,7 @@ import time
 import glob
 import contextlib
 import io
+import json
 
 #--- Glowna funkcja programu
 def run_analysis():
@@ -28,17 +29,17 @@ def run_analysis():
 
 #--- Funkcja czyta i wysyla plik wynikowy z URLami na stdout
 def send_output():
-	if os.path.exists(glob.glob(sys.argv[1]+'*.results')):	# sprawdza czy folder wynikowy istnieje !!! MUSI BYC TYLKO JEDEN FOLDER WYNIKOWY
-		RES_DIR=glob.glob(sys.argv[1]+'*.results') 	# jezeli folder istnial to zapisuje jego lokalizacje
-		FILES=os.walk(RES_DIR)				# od tak tylko sprawdza pliki w folerze wynikowym
-		URLS=RES_DIR+'/'+'urls.json'			# wskazuje na plik urls.json
-		AURLS=RES_DIR+'/'+'active_urls.json'		# wskazuje na plik active_urls.json
-		if os.path.exists(URLS):			# jezeli plik urls.json istnieje
-			with open(URLS) as f:			# to go otwiera
+	RES_DIR=glob.glob('*.results') 	# jezeli folder istnial to zapisuje jego lokalizacje
+	if os.path.exists(RES_DIR[0]):	# sprawdza czy folder wynikowy istnieje !!! MUSI BYC TYLKO JEDEN FOLDER WYNIKOWY
+		FILES=os.walk(RES_DIR[0])				# od tak tylko sprawdza pliki w folerze wynikowym
+		URLS=RES_DIR[0]+'/'+'urls.json'			# wskazuje na plik urls.json
+		AURLS=RES_DIR[0]+'/'+'active_urls.json'		# wskazuje na plik active_urls.json
+		if os.path.exists(str(URLS)):			# jezeli plik urls.json istnieje
+			with open(str(URLS)) as f:			# to go otwiera
 				data = json.load(f)		# laduje jako json
 				print json.dumps(data, indent=4, separators=(',',':'))	# wypisuje z wcieciem i przecinkiem miedzy rekordami
-		if os.path.exists(AURLS):			# jezeli plik active_urls.json istnieje
-			with open(AURLS) as fi:			# to go otwiera
+		if os.path.exists(str(AURLS)):			# jezeli plik active_urls.json istnieje
+			with open(str(AURLS)) as fi:			# to go otwiera
 				data2 = json.load(fi)		# laduje jako json
 				print json.dumps(data2, indent=4, separators=(',',':')) 	# wypisuje z wcieciem i przecinkiem miedzy rekordami
 	else:							# jezeli folder wynikowy nie istnial
@@ -77,10 +78,8 @@ def HELP():
 #---MAIN---#
 def main():
 	check_state()
-
-	f = io.StringIO()
-	with redirect_stdout(f):
-		run_analysis()
+	
+	run_analysis()
 
 	send_output()
 
@@ -89,10 +88,8 @@ def main():
 #--- RAW ---#
 try:
 	main()
-
 except KeyboardInterrupt:
 	print "Przerwanie dzialania!"
-
 finally:
 	print "\n\nTutaj cleanup"
 	sys.exit()
