@@ -7,13 +7,8 @@
 # make_env()		- przygotowuje sobie srodowisko pracy
 # main()		- main to main :)
 
-import sys
-import os
-import os.path
-import time
+import sys, os, os.path, time, io
 import glob
-import contextlib
-import io
 import json
 
 #--- Glowna funkcja programu
