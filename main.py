@@ -74,18 +74,12 @@ def HELP():
 #--- Przygotowanie srodowiska pracy, utowrzenie folderow etc.
 #def make_env():
 
-#--- Wyciszanie outputu
-@contextlib.contextmanager
-def nostdout():
-	save_stdout = sys.stdout
-	sys.stdout = io.BytesIO()
-	yield
-	sys.stdout = save_stdout
-
 #---MAIN---#
 def main():
 	check_state()
-	with nostdout():
+
+	f = io.StringIO()
+	with redirect_stdout(f):
 		run_analysis()
 
 	send_output()
@@ -95,8 +89,10 @@ def main():
 #--- RAW ---#
 try:
 	main()
+
 except KeyboardInterrupt:
 	print "Przerwanie dzialania!"
+
 finally:
 	print "\n\nTutaj cleanup"
 	sys.exit()
