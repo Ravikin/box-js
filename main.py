@@ -11,6 +11,24 @@ import sys, os, os.path, time, io
 import glob
 import json
 
+#--- Zbior flag dla box-js uzywanych w trakcie analizy
+class F:
+	download="--download"
+	t20="--timeout=20"
+	t30="--timeout=30"
+	t120="--timeout=120"
+	nfe="--no-file-exists"
+	ncr="--no-catch-rewrite"
+	nccr="--no-cc_on-rewrite"
+	ncs="--no-concat-simplify"
+	ne="--no-echo"
+	ner="--no-eval-rewrite"
+	nr="--no-rewrite"
+	nse="--no-shell-error"
+	ntr="--no-typeof-rewrite"
+	xp="--windows-xp"
+	exp="--experimental-neq"
+
 #--- v1 Glowna funkcja programu
 def run_analysis():
 	ARGS=len(sys.argv) 					# Zaczytuje ilosc argumentow jako liczbe
@@ -76,6 +94,8 @@ def check_state():
 		elif args=='-?':
 			HELP()
 			sys.exit()
+		elif args=='-A':
+		
 
 def HELP():
 	print "TO JEST HELP"
