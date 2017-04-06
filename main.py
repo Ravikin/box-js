@@ -11,7 +11,7 @@ import sys, os, os.path, time, io
 import glob
 import json
 
-#--- Glowna funkcja programu
+#--- v1 Glowna funkcja programu
 def run_analysis():
 	ARGS=len(sys.argv) 					# Zaczytuje ilosc argumentow jako liczbe
 	command = 'node /root/javascr/box-js/run.js ' 
@@ -21,6 +21,17 @@ def run_analysis():
 			print sys.argv[i]				# DEBUG
 	print command  							# DEBUG
 	os.system(command)					 # uruchamia run.js z dodanymi argumentami
+	
+#--- v2 Glowna funkcja programu
+def analysis(name, *flags):
+	command = 'node /root/javascr/box-js/run.js ' + name + ' ' 
+	for flag in flags:  					# petla dodaje do stringa command wszystkie argumenty
+		command+=flag + ' '				# to dodajemy go do konca stringa z komenda
+		print flag						# DEBUG
+	print command  							# DEBUG
+	os.system(command)					 # uruchamia run.js z dodanymi argumentami
+
+
 
 #--- Funkcja czyta i wysyla plik wynikowy z URLami na stdout
 def send_output():
@@ -44,8 +55,11 @@ def send_output():
 def find_res():
 	CWD=os.getcwd()
 	RES=glob.glob('*.results')
+	print RES						# DEBUG
 	RES_PATH=cwd + '/' + RES
+	print os.getcwd()					# DEBUG
 	os.chdir(RES_PATH)
+	print os.getcwd()					# DEBUG
 
 #--- Zwykly help
 def check_state():
@@ -70,6 +84,10 @@ def HELP():
 #--- Przygotowanie srodowiska pracy, utowrzenie folderow etc.
 #def make_env():
 
+#--- CLEANUP
+def cleanup():
+	time.sleep(1)
+
 #---MAIN---#
 def main():
 	check_state()
@@ -86,5 +104,5 @@ try:
 except KeyboardInterrupt:
 	print "Przerwanie dzialania!"
 finally:
-	print "\n\nTutaj cleanup"
+	cleanup()
 	sys.exit()
