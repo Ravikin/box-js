@@ -29,18 +29,17 @@ class F:
 	xp="--windows-xp"
 	exp="--experimental-neq"
 
-#--- v1 Glowna funkcja programu
+#--- [OLD] v1 Glowna funkcja programu
 def run_analysis():
 	ARGS=len(sys.argv) 					# Zaczytuje ilosc argumentow jako liczbe
 	command = 'node /root/javascr/box-js/run.js ' 
-	for i in range(ARGS):  					# petla dodaje do stringa command wszystkie argumenty
-		if i>0:						# jezeli numer argumentu wiekszy od 1 (czyli od nazwy uruchamianego pliku)
-			command+=sys.argv[i] + ' '		# to dodajemy go do konca stringa z komenda
-			print sys.argv[i]				# DEBUG
+	for arg in sys.argv[1:]:  				# petla dodaje do stringa command wszystkie argumenty
+		command+=arg + ' '				# to dodajemy go do konca stringa z komenda
+		print arg						# DEBUG
 	print command  							# DEBUG
 	os.system(command)					 # uruchamia run.js z dodanymi argumentami
 	
-#--- v2 Glowna funkcja programu
+#--- [NEW] v2 Glowna funkcja programu
 def analysis(name, *flags):
 	command = 'node /root/javascr/box-js/run.js ' + name + ' ' 
 	for flag in flags:  					# petla dodaje do stringa command wszystkie argumenty
@@ -52,10 +51,12 @@ def analysis(name, *flags):
 
 
 #--- Funkcja czyta i wysyla plik wynikowy z URLami na stdout
-def send_output():
-	RES_DIR=glob.glob('*.results') 	# jezeli folder istnial to zapisuje jego lokalizacje
-	if os.path.exists(RES_DIR[0]):	# sprawdza czy folder wynikowy istnieje !!! MUSI BYC TYLKO JEDEN FOLDER WYNIKOWY
-		FILES=os.walk(RES_DIR[0])				# od tak tylko sprawdza pliki w folerze wynikowym
+def send_output(name):
+	RES_DIR=glob.glob(name+'.results') 			# jezeli folder istnial to zapisuje jego lokalizacje
+	RES_DIR=''.join(RES_DIR)
+	print RES_DIR						# DEBUG
+	if os.path.exists(RES_DIR):				# sprawdza czy folder wynikowy istnieje !!! MUSI BYC TYLKO JEDEN FOLDER WYNIKOWY
+		FILES=os.walk(RES_DIR)				# od tak tylko sprawdza pliki w folerze wynikowym
 		URLS=RES_DIR[0]+'/'+'urls.json'			# wskazuje na plik urls.json
 		AURLS=RES_DIR[0]+'/'+'active_urls.json'		# wskazuje na plik active_urls.json
 		if os.path.exists(str(URLS)):			# jezeli plik urls.json istnieje
@@ -70,9 +71,9 @@ def send_output():
 		raise NameError("Brak folderu wynikowego")	# to zwraca exception
 
 #--- Find results - znajduje folder z wynikami i poki co tyle...
-def find_res():
+def find_res(name):
 	CWD=os.getcwd()
-	RES=glob.glob('*.results')
+	RES=glob.glob(name+'.results')
 	print RES						# DEBUG
 	RES_PATH=cwd + '/' + RES
 	print os.getcwd()					# DEBUG
