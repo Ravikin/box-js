@@ -13,7 +13,7 @@ import json
 
 #--- Zbior flag dla box-js uzywanych w trakcie analizy
 class F:
-	download="--download"
+	d="--download"
 	t20="--timeout=20"
 	t30="--timeout=30"
 	t120="--timeout=120"
@@ -83,20 +83,20 @@ def find_res(name):
 #--- Zwykly help
 def check_state():
 	for args in sys.argv:					# jezeli wsrod podanych argumentow jest ktorys z ifa to wywoluje HELP() i konczy
-		if args=='-h':
+		if args== '-h':
 			HELP()
 			sys.exit()
-		elif args=='--help':
-			HELP()
-			sys.exit()
-		elif args=='/?':
-			HELP()
-			sys.exit()
-		elif args=='-?':
-			HELP()
-			sys.exit()
-		elif args=='-A':
-		
+		elif args == '-U':				# U - Uniwersalny
+			analysis(name,F.t30,F.nfe)
+		elif args == '-D':				# D - Download
+			analysis(name,F.t30,F.nfe,F.d)
+		elif args == '-oD':				# oD - Only Download
+			analysis(name,F.d)
+		elif args == '-LD':				# LD - Long Download
+			analysis(name,F.t120,F.d)
+
+
+
 
 def HELP():
 	print "TO JEST HELP"
