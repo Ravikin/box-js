@@ -87,26 +87,28 @@ def __send(plik):										# step 3
 	output = {}										# tworzymy pusty slownik #TODO #TMP
 	print n 									# DEBUG
 	if n == 1:									# sprawdzamy czy analiza powiodla sie od razu czy za 'n razem
-		print "Zmieniam folder na "+os.path.basename(plik)+".results"		# DEBUG
 		print "N==1"
+		print "Zmieniam folder na "+os.path.basename(plik)+".results"		# DEBUG
 		os.chdir(os.path.basename(plik)+'.results')					# wchodzimy do folderu z wynikami
 		with open("urls.json") as f:
 			output = json.load(f)
-			print json.dumps(output, indent=4, separators=(',',':'))
+			return json.dumps(output, indent=4, separators=(',',':')) 	# TEST
+			#print json.dumps(output, indent=4, separators=(',',':'))	
 	elif n > 1:
-		print "N>1"
 		print "Zmieniam folder na "+os.path.basename(plik)+".results"		# DEBUG
 		os.chdir(os.path.basename(plik)+"."+str(n)+'.results')				# wchodzimy do najaktualniejszego folderu z wynikami
 		if os.path.exists("urls.json"):
 			with open("urls.json") as f:
 				output = json.load(f)
-				print json.dumps(output, indent=4, separators=(',',':'))
+				return json.dumps(output, indent=4, separators=(',',':'))	# TEST
+				#print json.dumps(output, indent=4, separators=(',',':'))
 		elif os.path.exists("active_urls.json"):
 			with open("active_urls.json") as f:
 				output = json.load(f)
-				print json.dumps(output, indent=4, separators=(',',':'))
+				return json.dumps(output, indent=4, separators=(',',':'))	# TEST
+				#print json.dumps(output, indent=4, separators=(',',':'))	
 	else:
-		print "Pliki nie istnieja"
+		print "Pliki nie istnieja"							# INFO / DEBUG
 
 
 # -- FUNKCJA PRZYGOTOWAWCZA
@@ -132,16 +134,20 @@ def __cleanup():										# step 4
 	print "Cleanup DONE"									# DEBUG
 
 def main(plik, mode):										# ewentualnie zmienic na def run(plik): tak zeby bylo ladnie
-# step 0
-	plik = __init(plik)
-# step 1
-	if 'd' in mode:										# TODO - aplikacja nadrzedna decyduje co robic
-		plik = __decode(plik)
-	else:
-		pass
-# step 2
-	__anal(plik)
-# step 3 
-	__send(plik)
-# step 4
-	__cleanup()
+	try:
+	# step 0
+		plik = __init(plik)
+	# step 1
+		if 'd' in mode:										# TODO - aplikacja nadrzedna decyduje co robic
+			plik = __decode(plik)
+		else:
+			pass
+	# step 2
+		__anal(plik)
+	# step 3 
+		__send(plik)
+	finally:
+	#step 3 [moze byc niepelny]
+		__send(plik)
+	# step 4
+		__cleanup()

@@ -60,7 +60,7 @@ def send_output(name):
 		URLS=RES_DIR[0]+'/'+'urls.json'			# wskazuje na plik urls.json
 		AURLS=RES_DIR[0]+'/'+'active_urls.json'		# wskazuje na plik active_urls.json
 		if os.path.exists(str(URLS)):			# jezeli plik urls.json istnieje
-			with open(str(URLS)) as f:			# to go otwiera
+			with open(str(URLS)) as f:		# to go otwiera
 				data = json.load(f)		# laduje jako json
 				print json.dumps(data, indent=4, separators=(',',':'))	# wypisuje z wcieciem i przecinkiem miedzy rekordami
 		if os.path.exists(str(AURLS)):			# jezeli plik active_urls.json istnieje

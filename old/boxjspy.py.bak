@@ -1,5 +1,5 @@
 # 04-2017 Mateusz Piorkowski (c) - Worker JS
-# v0.5 11-05-2017 15:21
+# v0.4 11-05-2017 11:03
 # /==README==\
 # step 0 - przygotowanie srodowiska (wlasny folder)
 # step 1 - dekodowanie pliku jse (o ile taki zostal podany)
@@ -10,7 +10,7 @@
 from random import randint
 import subprocess
 import json
-import os,shutil
+import os
 import datetime
 
 # -- TRASH
@@ -21,7 +21,6 @@ node="/usr/bin/node"
 boxjs="/root/javascr/box-js/run.js"
 decoder="/root/javascr/box-js/decoder"
 ID_NR=str(now.day)+'_'+str(now.month)+'_'+str(randint(1000,9999))				# nazwa folderu roboczego skladajaca sie z dnia miesiaca + numeru miesiaca + randomowego 4 znakowego inta
-n = 0												# zmienna sluzaca do zliczenia wywolan fora z analizy
 
 # -- SLOWNIK FLAG
 class F:
@@ -29,7 +28,6 @@ class F:
 	t10="--timeout=10"
 	t20="--timeout=20"
 	t30="--timeout=30"	
-	t60="--timeout=60"
 	t120="--timeout=120"
 	t360="--timeout=360"
 	nfe="--no-file-exists"
@@ -47,70 +45,49 @@ class F:
 
 # -- FUNKCJA DEKODUJACA
 def __decode(s_name):										# step 1
-	global  decoder 									# Pobiera lokalizacje (sciezke) decodera ze zmiennej globalnej
+	global  decoder 									# Pobiera lokalizacje (sciezke) decodera
 	try:
-		o_name = "/d_jsanal.tmp"									# Tworzy nazwe pliku wyjsciowego -> o_name (podmienia tylko .jse na .js)
+		o_name=s_name.replace("jse","js")						# Tworzy nazwe pliku wyjsciowego -> o_name (podmienia tylko .jse na .js)
 		proc = subprocess.Popen([decoder, s_name, o_name], stdout = subprocess.PIPE)	# Dekompiluje wskazany plik  
 		(out, err) = proc.communicate()							# Zarzadza wyjsciami [domyslnie program nic nie wypisuje]
 		print out									# DEBUG
 		print err									# DEBUG
-		return os.getcwd()+o_name							# Zwrocenie sciezki pliku wynikowego
+		return o_name									# Zwrocenie nazwy/sciezki pliku wynikowego (w zaleznosci co zostalo podane na wejsciu)
 	except:
-		raise NameError("ERROR:"+str(_))						# Jezeli cos sie nie udalo to zwraca blad i wynik dzialania ostatniego polecenia -> _ (podkreslenie to zmienna zawierajaca wynik dzialania ostatniego polecenia)
+		# TO DO
+		# Znalezc sposob jak wypisac blad z try: (zmienna err nie zostaje zainicjalizowana - program nie dociera do tego miejsca)
+		raise NameError("ERROR")							# Jezeli cos sie nie udalo to zwraca blad
 		
 
 # -- FUNKCJA ANALIZUJACA
-def __anal(s_name):										# step 2 (funkcja nic nie zwraca bo wynik analizy jest w plikach)
+def __anal(s_name):										# step 2
 	substring = "timed out"									# Definicja stringa szukanego w wyjsciu subprocesu dla -> box-js/run.js
-	out="timed out"										# Dodany po to zeby for wykonal sie przynajmniej raz (ze wzgledu na ifa w srodku)
-	global node, boxjs, n									# Pobiera lokalizacje (sciezki) dla nodejs oraz sandboxa box-js
+	global node, boxjs									# Pobiera lokalizacje (sciezki) dla nodejs oraz sandboxa box-js
 	for timeout in [F.t10,F.t30,F.t60,F.t120,F.t360]:					# Proboj analizowac plik dla wskazanych timeoutow jezeli w out pojawi sie 'timed out'	
 		if substring in out:								# Jezeli analiza zakonczyla sie timeoutem to powtorz
 			flags=' '.join([timeout, F.nfe, F.d])					# Flagi z jakimi ma zostac uruchomiona analiza
-			proc = subprocess.Popen([node, boxjs, s_name, flags], stdout=subprocess.PIPE)	# Analizujemy
+			proc = subprocess.Popen([node, boxjs, s_name, flags], stdout=subprocess.PIPE]	# Analizujemy
 			(out, err) = proc.communicate()						# Przypisujemy wyjscie z analizy do zmienych out oraz err
-			with open('debug.log','w') as f:					# DEBUG
-				f.write("OUTPUT:\r\n"+str(out)+str(err))					# DEBUG
+			with open('debug.log','w') as f:
+				f.write("OUTPUT:\r\n"out+err)	
 			print "TIMEDOUT"							# DEBUG
-			n += 1
 			continue								# time out sie pojawil wiec wracamy do for'a
 		else:
 			print "WYNIK POZYTYWNY"							# DEBUG
 			break									# timeoutu nie ma wiec lecim dalej 
-	if substring in out:									# W przypadku gdy petla [:66]for zakonczyla sie z wynikiem negatywnym (tzn gdy doszlo do timeoutu) to wypisujemy ta informacje
+	if substring in out:									# W przypadku gdy petla [:46]for zakonczyla sie z wynikiem negatywnym (tzn gdy doszlo do timeoutu) to wypisujemy ta informacje
 		print "Analiza nieudana - time out"						# DEBUG
+		raise NameError("TIMED OUT")
 		
 
 # -- FUNKCJA ZWRACAJACA WYNIK ANALIZY
-def __send(plik):										# step 3
-	# funkcja ma zwracac wynik w postaci slownika
-	output = {}										# tworzymy pusty slownik #TODO #TMP
-	print n 									# DEBUG
-	if n == 1:									# sprawdzamy czy analiza powiodla sie od razu czy za 'n razem
-		print "Zmieniam folder na "+os.path.basename(plik)+".results"		# DEBUG
-		print "N==1"
-		os.chdir(os.path.basename(plik)+'.results')					# wchodzimy do folderu z wynikami
-		with open("urls.json") as f:
-			output = json.load(f)
-			print json.dumps(output, indent=4, separators=(',',':'))
-	elif n > 1:
-		print "N>1"
-		print "Zmieniam folder na "+os.path.basename(plik)+".results"		# DEBUG
-		os.chdir(os.path.basename(plik)+"."+str(n)+'.results')				# wchodzimy do najaktualniejszego folderu z wynikami
-		if os.path.exists("urls.json"):
-			with open("urls.json") as f:
-				output = json.load(f)
-				print json.dumps(output, indent=4, separators=(',',':'))
-		elif os.path.exists("active_urls.json"):
-			with open("active_urls.json") as f:
-				output = json.load(f)
-				print json.dumps(output, indent=4, separators=(',',':'))
-	else:
-		print "Pliki nie istnieja"
-
+def __send():											# step 3
+	# wchodzi do folderow z wynikiem i wypisuje zawartosc
+	# UPDATE - funkcja ma zwracac wynik w postaci slownika
+	output = {}
 
 # -- FUNKCJA PRZYGOTOWAWCZA
-def __init(plik):										# step 0
+def __init():											# step 0
 	global ID_NR										# importujemy globalna nazwe folderu roboczego 
 	try:
 		if not os.path.exists(ID_NR):							# jezeli folder nie istnieje 
@@ -118,30 +95,25 @@ def __init(plik):										# step 0
 			os.makedirs(ID_NR)							# to tworzymy nowy - nie zakladam kolizji
 		error="Zmieniam folder na \'"+ID_NR+"\'"					# DEBUG
 		os.chdir(ID_NR)									# wchodzimy do nowo utworzonego folderu
-		with open ("jsanal.tmp",'w') as file:						# Otwieramy tymczasowy plik (zapisujemy podany obiekt do pliku)
-			file.write(plik.read())							# zapisujemy podany obiekt w celu dalszej analizy (box-js pracuje na pliku)
-		return os.getcwd()+"/jsanal.tmp"
 	except:
 		raise NameError("__init() zawiodl przy: "+error)				# DEBUG
 
 
 def __cleanup():										# step 4
 	# usuwamy pliki tmp oraz ewentualnie workdir
-	os.chdir('..')										# Wychodzimy z folderu roboczego
-	shutil.rmtree(ID_NR, ignore_errors=True)						# Usuwamy folder roboczy wraz z zawartoscia
-	print "Cleanup DONE"									# DEBUG
 
-def main(plik, mode):										# ewentualnie zmienic na def run(plik): tak zeby bylo ladnie
+
+def main(plik):											# ewentualnie zmienic na def run(plik): tak zeby bylo ladnie
 # step 0
-	plik = __init(plik)
+	__init()
 # step 1
-	if 'd' in mode:										# TODO - aplikacja nadrzedna decyduje co robic
-		plik = __decode(plik)
+	if plik.endswith("jse"):
+		plik=__decode(plik)
 	else:
 		pass
 # step 2
 	__anal(plik)
 # step 3 
-	__send(plik)
+	__send()
 # step 4
 	__cleanup()
